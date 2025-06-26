@@ -1,0 +1,56 @@
+----------- What are CTEs in SQL? ------------------
+
+CTE (Common Table Expression) is a temporary result set in SQL that you can reference within a SELECT, INSERT, UPDATE, or DELETE statement.
+It improves readability and organization of complex queries.
+#### CTE ek temporary table hoti hai jo WITH clause ke through banai jati hai ,,,  
+### yeh table sirf ussi query ke dauran  rehti hai jahan use define kiya gaya ho.
+
+-> Synatax
+
+WITH cte_name AS (
+    -- Your SQL query
+    SELECT column1, column2
+    FROM table_name
+    WHERE condition
+)
+-- Use the CTE like a table
+SELECT *
+FROM cte_name;
+
+✅ How CTEs Work:
+The WITH clause defines a temporary result set (the CTE).
+This CTE can then be referenced just like a table in the main query that follows.
+It only exists during the execution of that single query.
+
+| Use Case                       | Description                                                                 |
+| ------------------------------ | --------------------------------------------------------------------------- |
+| **Readability**                | Breaks down complex queries into logical blocks.                            |
+| **Reusability**                | You can refer to the same logic multiple times in one query.                |
+| **Recursive Queries**          | Can perform recursive operations like hierarchical data (e.g., org charts). |
+| **Avoid Subquery Duplication** | Instead of writing the same subquery multiple times, use a CTE once.        |
+
+-> Example:
+
+WITH SalesCTE AS (
+  SELECT customer_id, SUM(amount) AS total_sales
+  FROM sales
+  GROUP BY customer_id
+)
+SELECT *
+FROM SalesCTE
+WHERE total_sales > 1000;
+
+
+-> Example
+
+WITH top_customers AS (
+    SELECT customer_id, SUM(total_amount) AS total_spent
+    FROM orders
+    GROUP BY customer_id
+)
+SELECT * FROM top_customers WHERE total_spent > 5000;
+
+
+
+
+
