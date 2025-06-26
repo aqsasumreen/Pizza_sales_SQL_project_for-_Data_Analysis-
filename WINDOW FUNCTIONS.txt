@@ -1,0 +1,126 @@
+					WINDOW FUNCTIONS 
+
+Window Functions applies aggregate, ranking and analytics over a particular window (set of rows).
+-> OVER clause is used with window functions to define that window.
+-> Aggregate Functions(Sum, Avg, etc) = Give output one row per aggregation (aik single row)
+-> Window Functions ==The rows maintain their separate identities (aik column me value detaa)
+-> Syntax:
+		SELECT col_name(s),
+			func()over( [PARTITION BY Clause]
+                                    [ORDER BY Clause]
+				    [ROW or RANGE Clause])
+					
+		from table_name
+
+-> we have 3 types of functions:
+i- Aggregate Func, ii- Ranking Func. iii- Analytics Func		
+
+-> Over Clause has 3 parts:
+i- Partition By (divides the rows into partitions so we can specify which row to use to compute the window function)
+ii- Order By (kis col k according sort krna)
+iii- Rows (basically defines a range) 
+	ROW Clause
+
+	Purpose: Selects a specific number of rows before or after the current row.
+	Example: ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING
+
+	RANGE Clause
+
+	Purpose: Selects rows based on the values of the ordering column(s).
+	Example: RANGE BETWEEN 10 PRECEDING AND 10 FOLLOWING
+
+
+-> Expression is the name of col that we want the window function to operate on like sales, this may not b necessary,,
+
+
+WINDOW FUNCTION TYPES (in most used cases)
+There is no official division of the SQL window functions into categories but high level we can divide into three types:
+
+Window Functions
+➡️ Aggregate
+
+SUM, AVG, COUNT, MIN, MAX
+
+SELECT new_id, new_cat,
+       SUM(new_id) OVER (PARTITION BY new_cat ORDER BY new_id) AS "Total",
+       AVG(new_id) OVER (PARTITION BY new_cat ORDER BY new_id) AS "Average",
+       COUNT(new_id) OVER (PARTITION BY new_cat ORDER BY new_id) AS "Count",
+       MIN(new_id) OVER (PARTITION BY new_cat ORDER BY new_id) AS "Min",
+       MAX(new_id) OVER (PARTITION BY new_cat ORDER BY new_id) AS "Max"
+FROM test_data;
+
+
+| new_id | new_cat | Total | Average | Count | Min | Max |
+|---------|---------|--------|---------|--------|-------|-------|
+| 100     | Agni    | 300    | 150     | 2      | 100   | 200   |
+| 200     | Agni    | 300    | 150     | 2      | 100   | 200   |
+| 500     | Dharti  | 1200   | 600     | 2      | 500   | 700   |
+| 700     | Dharti  | 1200   | 600     | 2      | 500   | 700   |
+| 200     | Vayu    | 1000   | 333.3333| 3      | 200   | 500   |
+| 300     | Vayu    | 1000   | 333.3333| 3      | 200   | 500   |
+| 500     | Vayu    | 1000   | 333.3333| 3      | 200   | 500   
+
+
+
+
+➡️ Ranking(imp for interview)
+
+ROW_NUMBER, RANK, DENSE_RANK, PERCENT_RANK
+
+SELECT new_id,
+       ROW_NUMBER() OVER (ORDER BY new_id) AS "ROW_NUMBER",
+       RANK() OVER (ORDER BY new_id) AS "RANK",
+       DENSE_RANK() OVER (ORDER BY new_id) AS "DENSE_RANK",
+       PERCENT_RANK() OVER (ORDER BY new_id) AS "PERCENT_RANK"
+FROM test_data;
+
+
+| new_id | ROW_NUMBER | RANK | DENSE_RANK | PERCENT_RANK |
+|---------|--------------|-------|------------|--------------|
+| 100     | 1            | 1     | 1          | 0            |
+| 200     | 2            | 2     | 2          | 0.166        |
+| 200     | 3            | 2     | 2          | 0.166        |
+| 300     | 4            | 4     | 3          | 0.5          |
+| 500     | 5            | 5     | 4          | 0.666        |
+| 500     | 6            | 5     | 4          | 0.666        |
+| 700     | 7            | 7     | 5          | 1            |
+
+
+
+
+
+➡️ Value/Analytic (imp for interview)
+
+LEAD, LAG, FIRST_VALUE, LAST_VALUE
+
+SELECT new_id,
+  FIRST_VALUE(new_id) OVER(ORDER BY new_id) AS "FIRST_VALUE",
+  LAST_VALUE(new_id) OVER(ORDER BY new_id) AS "LAST_VALUE", # agr hm ismy partition by ya rows clause use nhi krty tou exact new_id column de degaa,,,
+								iskkiye isky sath hmy,, "rows betweeb unbounded proceeding and unbounde following " use kry 
+								tou last value column ki mily gi,,
+  LEAD(new_id) OVER(ORDER BY new_id) AS "LEAD", # lead means next value,, phli row me dosry ki value and till end, last row me null
+  LAG(new_id) OVER(ORDER BY new_id) AS "LAG" # lag means pichli value,, phli row me null dosry me phli ki value and till end. 
+FROM test_data;
+
+-------- with offset value 2
+
+SELECT new_id,
+  LEAD(new_id, 2) OVER(ORDER BY new_id) AS "LEAD_by2",
+  LAG(new_id, 2) OVER(ORDER BY new_id) AS "LAG_by2"
+FROM test_data;
+
+-->LEAD(new_id, 2) means:
+👉 From the current row, move 2 rows forward (not skip 2 values).
+It’s based on position, not value.
+
+
+| Row No | new\_id | LEAD(new\_id, 2) |
+| ------ | ------- | ---------------- |
+| 1      | 100     | 200 (Row 3)      |
+| 2      | 200     | 300 (Row 4)      |
+| 3      | 200     | 500 (Row 5)      |
+| 4      | 300     | 500 (Row 6)      |
+| 5      | 500     | 700 (Row 7)      |
+| 6      | 500     | NULL             |
+| 7      | 700     | NULL             |
+
